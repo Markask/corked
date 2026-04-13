@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Corked — Vinskap</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <h1>Corked</h1>
+      <span class="subtitle">Temptech Classique CL180SB</span>
+    </div>
+
+    <div class="stats">
+      <span class="count"><span id="count-filled">0</span>/<span id="count-total">166</span> flasker</span>
+    </div>
+
+    <div class="filters" role="group" aria-label="Filtre">
+      <button type="button" class="filter-btn active" data-filter="all">Alle</button>
+      <button type="button" class="filter-btn" data-filter="red">Rødvin</button>
+      <button type="button" class="filter-btn" data-filter="white">Hvitvin</button>
+      <button type="button" class="filter-btn" data-filter="storage">Lagring</button>
+      <button type="button" class="filter-btn" data-filter="drink-now">Drikkes nå</button>
+    </div>
+
+    <div class="actions">
+      <button type="button" id="btn-export" title="Last ned backup som JSON-fil">Last ned backup</button>
+      <button type="button" id="btn-import" title="Last opp tidligere backup">Last opp backup</button>
+      <input type="file" id="file-import" accept="application/json,.json" hidden />
+    </div>
+  </header>
+
+  <main class="cabinet-wrap">
+    <svg id="cabinet" xmlns="http://www.w3.org/2000/svg" aria-label="Vinskap"></svg>
+  </main>
+
+  <!-- Tooltip for hover/tap -->
+  <div id="tooltip" class="tooltip" role="tooltip" hidden></div>
+
+  <!-- Modal for add / edit -->
+  <div id="modal" class="modal" hidden aria-hidden="true">
+    <div class="modal-backdrop" data-close="1"></div>
+    <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <header class="modal-header">
+        <h2 id="modal-title">Ny flaske</h2>
+        <button type="button" class="modal-close" data-close="1" aria-label="Lukk">×</button>
+      </header>
+
+      <form id="bottle-form" class="modal-body">
+        <input type="hidden" id="f-slot-id" />
+
+        <fieldset class="field">
+          <legend>Farge</legend>
+          <label><input type="radio" name="color" value="red" required /> <span class="swatch swatch-red"></span> Rødvin</label>
+          <label><input type="radio" name="color" value="white" /> <span class="swatch swatch-white"></span> Hvitvin</label>
+        </fieldset>
+
+        <fieldset class="field">
+          <legend>Status</legend>
+          <label><input type="radio" name="status" value="storage" required /> Lagring</label>
+          <label><input type="radio" name="status" value="drink-now" /> Drikkes nå</label>
+        </fieldset>
+
+        <fieldset class="field field-years">
+          <legend>Drikkes best (valgfritt)</legend>
+          <div class="year-row">
+            <label>Fra år <input type="number" id="f-drink-from" name="drinkFrom" min="1900" max="2200" step="1" placeholder="2035" /></label>
+            <label>Til år <input type="number" id="f-drink-until" name="drinkUntil" min="1900" max="2200" step="1" placeholder="2060" /></label>
+          </div>
+          <p class="hint">Hvis år er satt, overstyrer de statusen over — flasken blir automatisk «Drikkes nå» når året passerer «Fra år».</p>
+        </fieldset>
+
+        <label class="field">
+          <span>Navn (valgfritt)</span>
+          <input type="text" id="f-name" name="name" placeholder="F.eks. Barolo 2018" maxlength="80" />
+        </label>
+
+        <div class="field">
+          <span>Passer til mat</span>
+          <div class="tag-row" id="food-tags">
+            <button type="button" class="tag" data-tag="Lam">Lam</button>
+            <button type="button" class="tag" data-tag="Biff">Biff</button>
+            <button type="button" class="tag" data-tag="Vilt">Vilt</button>
+            <button type="button" class="tag" data-tag="Fisk">Fisk</button>
+            <button type="button" class="tag" data-tag="Skalldyr">Skalldyr</button>
+            <button type="button" class="tag" data-tag="Kylling">Kylling</button>
+            <button type="button" class="tag" data-tag="Pasta">Pasta</button>
+            <button type="button" class="tag" data-tag="Ost">Ost</button>
+            <button type="button" class="tag" data-tag="Dessert">Dessert</button>
+            <button type="button" class="tag" data-tag="Aperitiff">Aperitiff</button>
+            <button type="button" class="tag" data-tag="Kos">Kos</button>
+            <button type="button" class="tag" data-tag="Meditasjon">Meditasjon</button>
+            <button type="button" class="tag" data-tag="Hverdag">Hverdag</button>
+            <button type="button" class="tag" data-tag="Selskap">Selskap</button>
+          </div>
+          <input type="text" id="f-food" name="food" placeholder="eller skriv fritt — f.eks. 'modne oster, tapas'" maxlength="200" />
+        </div>
+
+        <footer class="modal-footer">
+          <button type="button" id="btn-remove" class="btn-danger" hidden>Kvitter ut</button>
+          <div class="spacer"></div>
+          <button type="button" class="btn-ghost" data-close="1">Avbryt</button>
+          <button type="submit" class="btn-primary" id="btn-save">Lagre</button>
+        </footer>
+      </form>
+    </div>
+  </div>
+
+  <!-- Confirm remove dialog -->
+  <div id="confirm" class="modal" hidden aria-hidden="true">
+    <div class="modal-backdrop" data-close-confirm="1"></div>
+    <div class="modal-panel modal-small" role="alertdialog" aria-modal="true" aria-labelledby="confirm-title">
+      <header class="modal-header">
+        <h2 id="confirm-title">Kvittere ut flaske?</h2>
+      </header>
+      <div class="modal-body">
+        <p id="confirm-text">Er du sikker?</p>
+      </div>
+      <footer class="modal-footer">
+        <div class="spacer"></div>
+        <button type="button" class="btn-ghost" data-close-confirm="1">Avbryt</button>
+        <button type="button" class="btn-danger" id="confirm-yes">Ja, fjern</button>
+      </footer>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
