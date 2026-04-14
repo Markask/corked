@@ -11,7 +11,7 @@
 const STORAGE_KEY = "vinskap-v1";
 const SVG_NS = "http://www.w3.org/2000/svg";
 
-// Temptech CL180SB — fysisk oppsett observert av brukeren:
+// Fysisk oppsett:
 // 16 hyller × 6 flasker = 96 synlige plasser. Produsentens "166"
 // refererer til totalkapasitet med flasker lagret bak-rad/staggered,
 // men appen sporer visuelt tilgjengelige plasser (6 per hylle).

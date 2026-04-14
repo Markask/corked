@@ -1,6 +1,6 @@
 # Corked
 
-En visuell vinskap-app for **Temptech Classique CL180SB** (16 hyller × 6 flasker = 96 plasser).
+En visuell vinskap-app (16 hyller × 6 flasker = 96 plasser).
 Klikk på en plass for å registrere en flaske med farge (rødvin/hvitvin), status (lagring / drikkes nå), matpar og drikkevindu (år). Hold musen over en flaske for å se info.
 
 ## Live
